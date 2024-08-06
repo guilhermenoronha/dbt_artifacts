@@ -7,7 +7,12 @@ select
     cast(null as {{ type_string() }}) as command_invocation_id,
     cast(null as {{ type_string() }}) as dbt_version,
     cast(null as {{ type_string() }}) as project_name,
-    cast(null as {{ type_timestamp() }}) as run_started_at,
+    {% if config.get("table_type") == "iceberg" -%}
+        cast(null as timestamp(6))
+    {%- else -%}
+        cast(null as {{ type_timestamp() }})
+    {%- endif -%}
+    as run_started_at,
     cast(null as {{ type_string() }}) as dbt_command,
     cast(null as {{ type_boolean() }}) as full_refresh_flag,
     cast(null as {{ type_string() }}) as target_profile_name,

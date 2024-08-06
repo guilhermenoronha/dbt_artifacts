@@ -6,7 +6,12 @@ with dummy_cte as (
 select
     cast(null as {{ type_string() }}) as command_invocation_id,
     cast(null as {{ type_string() }}) as node_id,
-    cast(null as {{ type_timestamp() }}) as run_started_at,
+    {% if config.get("table_type") == "iceberg" -%}
+        cast(null as timestamp(6))
+    {%- else -%}
+        cast(null as {{ type_timestamp() }})
+    {%- endif -%}
+    as run_started_at,
     cast(null as {{ type_string() }}) as database,
     cast(null as {{ type_string() }}) as schema,
     cast(null as {{ type_string() }}) as source_name,
