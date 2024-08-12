@@ -20,11 +20,16 @@
 
             {# Upload in chunks to reduce the query size #}
             {% if dataset == 'models' %}
-                {% set upload_limit = 50 if target.type == 'bigquery' else 100 %}
+                {% if target.type == 'biquery' %}
+                    {% set upload_limit = 50 %}
+                {% elif target.type == 'athena' %}
+                    {% set upload_limit = 30 %}
+                {% else %}
+                    {% set upload_limit = 100 %}
+                {% endif %}
             {% else %}
-                {% set upload_limit = 300 if target.type == 'bigquery' else 5000 %}
+                {% set upload_limit = 300 if target.type in ('bigquery', 'athena') else 5000 %}
             {% endif %}
-
             {# Loop through each chunk in turn #}
             {% for i in range(0, objects | length, upload_limit) -%}
 

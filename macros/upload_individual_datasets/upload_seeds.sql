@@ -109,3 +109,38 @@
         {{ return("") }}
     {% endif %}
 {%- endmacro %}
+
+{% macro athena__get_seeds_dml_sql(seeds) -%}
+    {% if seeds != [] %}
+        {% set seed_values %}
+            {% for seed in seeds -%}
+                (
+                    '{{ invocation_id }}', {# command_invocation_id #}
+                    '{{ seed.unique_id }}', {# node_id #}
+                    {% if config.get("table_type") == "iceberg" %}
+                        cast('{{ run_started_at }}' as timestamp(6)), {# run_started_at #}
+                    {% else %}
+                        '{{ run_started_at }}', {# run_started_at #}
+                    {% endif %}
+                    '{{ seed.database }}', {# database #}
+                    '{{ seed.schema }}', {# schema #}
+                    '{{ seed.name }}', {# name #}
+                    '{{ seed.package_name }}', {# package_name #}
+                    '{{ seed.original_file_path | replace('\\', '\\\\') }}', {# path #}
+                    '{{ seed.checksum.checksum | replace('\\', '\\\\')}}', {# checksum #}
+                    {{ adapter.dispatch('parse_json', 'dbt_artifacts')(tojson(seed.config.meta)) }}, {# meta #}
+                    '{{ seed.alias }}', {# alias #}
+                    {% if var('dbt_artifacts_exclude_all_results', false) %}
+                        null
+                    {% else %}
+                        {{ adapter.dispatch('parse_json', 'dbt_artifacts')(tojson(seed) | replace("\\", "\\\\") | replace("'","\\'") | replace('"', '\\"')) }} {# all_results #}
+                    {% endif %}
+                )
+                {%- if not loop.last %},{%- endif %}
+            {%- endfor %}
+        {% endset %}
+        {{ seed_values }}
+    {% else %}
+        {{ return("") }}
+    {% endif %}
+{%- endmacro %}

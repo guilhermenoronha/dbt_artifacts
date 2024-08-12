@@ -109,3 +109,38 @@
         {{ return("") }}
     {% endif %}
 {%- endmacro %}
+
+{% macro athena__get_sources_dml_sql(sources) -%}
+    {% if sources != [] %}
+        {% set source_values %}
+            {% for source in sources -%}
+                (
+                    '{{ invocation_id }}', {# command_invocation_id #}
+                    '{{ source.unique_id }}', {# node_id #}
+                    {% if config.get("table_type") == "iceberg" %}
+                        cast('{{ run_started_at }}' as timestamp(6)), {# run_started_at #}
+                    {% else %}
+                        '{{ run_started_at }}', {# run_started_at #}
+                    {% endif %}
+                    '{{ source.database }}', {# database #}
+                    '{{ source.schema }}', {# schema #}
+                    '{{ source.source_name }}', {# source_name #}
+                    '{{ source.loader }}', {# loader #}
+                    '{{ source.name }}', {# name #}
+                    '{{ source.identifier }}', {# identifier #}
+                    '{{ source.loaded_at_field | replace("'","\\'") }}', {# loaded_at_field #}
+                    '{{ adapter.dispatch('parse_json', 'dbt_artifacts')(tojson(source.freshness) | replace("'","\\'")) }}',  {# freshness #}
+                    {% if var('dbt_artifacts_exclude_all_results', false) %}
+                        null
+                    {% else %}
+                        '{{ adapter.dispatch('parse_json', 'dbt_artifacts')(tojson(source) | replace("\\", "\\\\") | replace("'", "\\'") | replace('"', '\\"')) }}' {# all_results #}
+                    {% endif %}
+                )
+                {%- if not loop.last %},{%- endif %}
+            {%- endfor %}
+        {% endset %}
+        {{ source_values }}
+    {% else %}
+        {{ return("") }}
+    {% endif %}
+{%- endmacro %}
