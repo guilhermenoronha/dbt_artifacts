@@ -224,7 +224,7 @@
                 '{{ test.thread_id }}', {# thread_id #}
                 '{{ test.status }}', {# status #}
 
-                {% set compile_started_at = (model.timing | selectattr("name", "eq", "compile") | first | default({}))["started_at"] %}
+                {% set compile_started_at = (test.timing | selectattr("name", "eq", "compile") | first | default({}))["started_at"] %}
                 {% if compile_started_at %}
                     {% if config.get("table_type") == "iceberg" %}
                         cast('{{ compile_started_at }}' as timestamp(6)), {# compile_started_at #}
@@ -235,7 +235,7 @@
                     null
                 {% endif %}
 
-                {% set query_completed_at = (model.timing | selectattr("name", "eq", "execute") | first | default({}))["completed_at"] %}
+                {% set query_completed_at = (test.timing | selectattr("name", "eq", "execute") | first | default({}))["completed_at"] %}
                 {% if query_completed_at %}
                     {% if config.get("table_type") == "iceberg" %}
                         cast('{{ query_completed_at }}' as timestamp(6)), {# query_completed_at #}
