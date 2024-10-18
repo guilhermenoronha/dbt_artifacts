@@ -28,7 +28,7 @@
                     {% set upload_limit = 100 %}
                 {% endif %}
             {% else %}
-                {% set upload_limit = 300 if target.type in ('bigquery', 'athena') else 5000 %}
+                {% set upload_limit = 50 if target.type in ('bigquery', 'athena') else 5000 %}
             {% endif %}
             {# Loop through each chunk in turn #}
             {% for i in range(0, objects | length, upload_limit) -%}
