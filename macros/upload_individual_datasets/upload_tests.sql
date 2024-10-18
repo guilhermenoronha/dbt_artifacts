@@ -111,14 +111,14 @@
                         '{{ run_started_at }}', {# run_started_at #}
                     {% endif %}
                     '{{ test.name }}', {# name #}
-                    {{ tojson(test.depends_on.nodes) }}, {# depends_on_nodes #}
+                    '{{ tojson(test.depends_on.nodes) }}', {# depends_on_nodes #}
                     '{{ test.package_name }}', {# package_name #}
                     '{{ test.original_file_path | replace('\\', '\\\\') }}', {# test_path #}
-                    {{ tojson(test.tags) }}, {# tags #}
+                    '{{ tojson(test.tags) }}', {# tags #}
                     {% if var('dbt_artifacts_exclude_all_results', false) %}
                         null
                     {% else %}
-                        {{ adapter.dispatch('parse_json', 'dbt_artifacts')(tojson(test) | replace("\\", "\\\\") | replace("'","\\'") | replace('"', '\\"')) }} {# all_fields #}
+                        '{{ (tojson(test) | replace("\\", "\\\\") | replace("'", '"') | replace('"', '\\"')) }}' {# all_fields #}
                     {% endif %}
                 )
                 {%- if not loop.last %},{%- endif %}
