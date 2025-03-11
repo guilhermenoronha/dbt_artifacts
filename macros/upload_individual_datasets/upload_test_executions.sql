@@ -232,7 +232,7 @@
                         '{{ compile_started_at }}', {# compile_started_at #}
                     {% endif %}
                 {% else %}
-                    null
+                    null,
                 {% endif %}
 
                 {% set query_completed_at = (test.timing | selectattr("name", "eq", "execute") | first | default({}))["completed_at"] %}
@@ -243,7 +243,7 @@
                         '{{ query_completed_at }}', {# query_completed_at #}
                     {% endif %}
                 {% else %}
-                    null
+                    null,
                 {% endif %}
 
                 {{ test.execution_time }}, {# total_node_runtime #}
